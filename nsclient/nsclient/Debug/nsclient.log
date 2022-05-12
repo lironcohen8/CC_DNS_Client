@@ -1,10 +1,12 @@
 ﻿  nsclient.c
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(38,40): warning C4047: 'function': 'const char *' differs in levels of indirection from 'char **'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(38,29): warning C4024: 'sendto': different types for formal and actual parameter 2
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(38,74): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(45,39): warning C4047: 'function': 'char *' differs in levels of indirection from 'hostent **'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(45,27): warning C4024: 'recvfrom': different types for formal and actual parameter 2
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(45,79): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(45,107): warning C4047: 'function': 'int *' differs in levels of indirection from 'unsigned int'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(45,81): warning C4024: 'recvfrom': different types for formal and actual parameter 6
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(34,58): warning C4133: 'function': incompatible types - from 'timeval *' to 'const char *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(89,41): warning C4047: 'function': 'const char *' differs in levels of indirection from 'dnsQueryPacket **'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(89,29): warning C4024: 'sendto': different types for formal and actual parameter 2
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(89,76): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(96,39): warning C4047: 'function': 'char *' differs in levels of indirection from 'hostent **'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(96,27): warning C4024: 'recvfrom': different types for formal and actual parameter 2
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(96,79): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(96,107): warning C4047: 'function': 'int *' differs in levels of indirection from 'unsigned int'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(96,81): warning C4024: 'recvfrom': different types for formal and actual parameter 6
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(75): warning C4716: 'CreateDnsQueryPacket': must return a value
   nsclient.vcxproj -> C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\Debug\nsclient.exe

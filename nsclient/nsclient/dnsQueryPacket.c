@@ -21,6 +21,7 @@ struct question {
 
 struct dnsQueryPacket {
 	struct header header;
+	char* qName;
 	struct question question;
 	//struct Answer answer;
 	//struct Authority authority;
