@@ -13,6 +13,7 @@ char* domainName, *resultIPAddress;
 int retVal, sockfd, queryPacketId = 1;
 
 void parseDomainNameIntoParts() {
+	// TODO delete
 	char* result = (char*)calloc(1024, sizeof(char));
 	char* token = strtok(domainName, ".");
 	while (token) {
@@ -60,9 +61,9 @@ void createQueryHeader(struct header* header) {
 	header->ARCOUNT = 0;
 }
 
-void createQueryQname(char *qName) {
-	int originalLength = strlen(domainName);
-
+char* createQueryQname() {
+	int originalLength = strlen(domainName); // www.google.com -> 3www6google3com0
+	return "3www6google3com0";
 }
 
 void createQueryQuestion(struct question* question) {
@@ -71,27 +72,27 @@ void createQueryQuestion(struct question* question) {
 }
 
 struct dnsQueryPacket* CreateDnsQueryPacket() {
-	struct dnsQueryPacket* queryPacket = (struct dnsQueryPacket*)calloc(1, sizeof(struct dnsQueryPacket*));
+	struct dnsQueryPacket* queryPacket = (struct dnsQueryPacket*)calloc(1, sizeof(struct dnsQueryPacket));
 	if (queryPacket == NULL) {
 		perror("Can't allocate memory for queryPacket.");
 	}
 
 	// Creating query header
-	struct header* header = (struct header*)calloc(1, sizeof(struct header*));
+	struct header* header = (struct header*)calloc(1, sizeof(struct header));
 	if (header == NULL) {
 		perror("Can't allocate memory for header.");
 	}
 	createQueryHeader(header);
 
 	// Creating qname
-	char* qName = (char*)calloc(1, sizeof(char*));
+	char* qName = (char*)calloc(1, sizeof(char));
 	if (qName == NULL) {
 		perror("Can't allocate memory for qName.");
 	}
-	createQueryQname(qName);
+	qName = createQueryQname();
 	
 	// Creating query question (after qname)
-	struct question* question = (struct question*)calloc(1, sizeof(struct question*));
+	struct question* question = (struct question*)calloc(1, sizeof(struct question));
 	if (question == NULL) {
 		perror("Can't allocate memory for question.");
 	}
@@ -99,19 +100,13 @@ struct dnsQueryPacket* CreateDnsQueryPacket() {
 
 	// Assembling packet
 	queryPacket->header = *header;
-	queryPacket->qName = *qName;
+	queryPacket->qName = qName;
 	queryPacket->question = *question;
 
 	return queryPacket;
 }
 
 struct hostent* dnsQuery(char *domainName) {
-	// Allocating memory for result struct
-	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent*));
-	if (queryResult == NULL) {
-		perror("Can't allocate memory for dnsQuery.");
-	}
-
 	// Creating dns query packet
 	struct dnsQueryPacket * queryPacket = CreateDnsQueryPacket();
 
@@ -123,11 +118,23 @@ struct hostent* dnsQuery(char *domainName) {
 		exit(1);
 	}
 
+	// Allocating memory for dns answer packet
+	struct dnsQueryPacket* answerPacket = (struct dnsQueryPacket*)calloc(1, sizeof(struct dnsQueryPacket));
+	if (answerPacket == NULL) {
+		perror("Can't allocate memory for answerPacket.");
+	}
+
 	// Recieve dns result from server
-	count = recvfrom(sockfd, &queryResult, sizeof(struct hostent), 0, &serverAddr, sizeof(struct sockaddr_in));
+	count = recvfrom(sockfd, &answerPacket, 65536, 0, &serverAddr, sizeof(struct sockaddr_in));
 	if (count < 0) { // There was an error
 		perror("Couldn't receieve dns query result from socket");
 		exit(1);
+	}
+
+	// Allocating memory for result struct
+	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent*));
+	if (queryResult == NULL) {
+		perror("Can't allocate memory for dnsQuery.");
 	}
 
 	// queryResult = gethostbyname(domainName);
@@ -163,7 +170,6 @@ int main(int argc, char* argv[]) {
 	retVal = scanf("%s", domainName);
 	while (strcmp(domainName, "quit") != 0) {
 		// Running DNS query using socket
-		parseDomainNameIntoParts();
 		struct hostent* queryResult = dnsQuery(domainName);
 		resultIPAddress = inet_ntoa(*((struct in_addr*)queryResult->h_addr_list[0]));
 		printf("%s\n", resultIPAddress);
