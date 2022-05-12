@@ -1,11 +1,7 @@
 ﻿  nsclient.c
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(36,58): warning C4133: 'function': incompatible types - from 'timeval *' to 'const char *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(115,41): warning C4047: 'function': 'const char *' differs in levels of indirection from 'dnsQueryPacket **'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(115,29): warning C4024: 'sendto': different types for formal and actual parameter 2
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(115,76): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(128,40): warning C4047: 'function': 'char *' differs in levels of indirection from 'dnsQueryPacket **'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(128,27): warning C4024: 'recvfrom': different types for formal and actual parameter 2
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(128,63): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(128,91): warning C4047: 'function': 'int *' differs in levels of indirection from 'unsigned int'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(128,65): warning C4024: 'recvfrom': different types for formal and actual parameter 6
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(124,41): warning C4047: 'function': 'const char *' differs in levels of indirection from 'dnsQueryPacket **'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(124,29): warning C4024: 'sendto': different types for formal and actual parameter 2
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(124,76): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(138,40): warning C4047: 'function': 'char *' differs in levels of indirection from 'dnsAnswerPacket **'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(138,27): warning C4024: 'recvfrom': different types for formal and actual parameter 2
   nsclient.vcxproj -> C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\Debug\nsclient.exe

@@ -15,15 +15,26 @@ struct header {
 };
 
 struct question {
+	char* QNAME;
 	unsigned short QTYPE;
 	unsigned short QCLASS;
 };
 
+struct answer {
+	char* NAME;
+	unsigned short TYPE;
+	unsigned short CLASS;
+	unsigned int TTL;
+	unsigned short RDLENGTH;
+	char* RDATA;
+};
+
 struct dnsQueryPacket {
 	struct header header;
-	char* qName;
 	struct question question;
-	//struct Answer answer;
-	//struct Authority authority;
-	//struct Additional additional;
+};
+
+struct dnsAnswerPacket {
+	struct header header;
+	struct answer answer;
 };
