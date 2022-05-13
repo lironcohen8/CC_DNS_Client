@@ -11,7 +11,7 @@ WSADATA wsaData;
 struct sockaddr_in serverAddr;
 unsigned char buf[65536];
 char* domainName, *resultIPAddress;
-int retVal, sockfd, qNameLength, addressSize = sizeof(struct sockaddr_in), queryPacketId = 1;
+int retVal, sockfd, qNameLength, queryPacketLength, addressSize = sizeof(struct sockaddr_in), queryPacketId = 1;
 
 void parseDomainNameIntoParts() {
 	// TODO delete
@@ -68,8 +68,7 @@ void createQueryQname(char *qNameStart) {
 	char* qName = qNameStart;
 	strcat((char*)domainName, ".");
 
-	for (int dotIndex = 0; dotIndex < (int)strlen((char*)domainName); dotIndex++)
-	{
+	for (int dotIndex = 0; dotIndex < (int)strlen((char*)domainName); dotIndex++) {
 		if (domainName[dotIndex] == '.')
 		{
 			*qName++ = dotIndex - letterIndex;
@@ -89,6 +88,7 @@ void createQueryQuestion(struct question *question) {
 	question->QCLASS = htons(1);
 	question->QTYPE = htons(1);
 }
+
 void createDnsQueryPacket() {
 	struct header* header = NULL;
 
@@ -105,22 +105,39 @@ void createDnsQueryPacket() {
 	createQueryQuestion(question);
 }
 
-//struct hostent* parseAnswerFromAnswerPacket() {
-//	// Allocating memory for result struct
-//	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent*));
-//	if (queryResult == NULL) {
-//		perror("Can't allocate memory for dnsQuery.");
-//	}
-//	// TODO continue
-//	return queryResult;
-//}
+void parseAnswerFromAnswerPacket(struct res_record* answerPacket, struct hostent* queryResult) {
+	// reading answers
+
+	char * IPString = ntohl(answerPacket->RDATA);
+	uint16_t length = ntohs(answerPacket->RESOURCE.RDLENGTH);
+	/*for (int i = 0; i < ntohs(answerPacket->ANCOUNT); i++)
+	{
+		answers[i].NAME = ReadName(reader, buf, stop);
+		reader += stop;
+		answers[i].resource = (struct r_data*)(reader);
+		reader += sizeof(R_DATA);
+		if (ntohs(answers[i].resource->type) == 1)
+		{
+			answers[i].rdata = new unsigned char[ntohs(answers[i].resource->data_len)];
+			for (int j = 0; j < ntohs(answers[i].resource->data_len); j++)
+				answers[i].rdata[j] = reader[j];
+			answers[i].rdata[ntohs(answers[i].resource->data_len)] = '';
+			reader += ntohs(answers[i].resource->data_len);
+		}
+		else
+		{
+			answers[i].rdata = ReadName(reader, buf, stop);
+			reader += stop;
+		}
+	}*/
+}
 
 struct hostent* dnsQuery(char *domainName) {
 	// Creating dns query packet
 	createDnsQueryPacket();
 
 	// Sending dns query packet to server
-	int queryPacketLength = sizeof(struct header) + qNameLength + sizeof(struct question);
+	queryPacketLength = sizeof(struct header) + qNameLength + sizeof(struct question);
 	retVal = sendto(sockfd, &buf, queryPacketLength, 0, &serverAddr, addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
 		perror("Couldn't send dns query packet to socket");
@@ -135,13 +152,11 @@ struct hostent* dnsQuery(char *domainName) {
 		perror("Couldn't receieve dns query result from socket");
 		exit(1);
 	}
-	struct header* answerPacket = (struct header*)buf;
-
+	struct res_record* answerPacket = (struct res_record*)&buf[queryPacketLength];
 
 	// Parsing queryResult from answer packet
-	struct hostent* queryResult = NULL; // ParseAnswerFromAnswerPacket(answerPacket);
-	char* answerReader = &buf[queryPacketLength];
-
+	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
+	parseAnswerFromAnswerPacket(answerPacket, queryResult);
 	// queryResult = gethostbyname(domainName);
 	return queryResult;
 }

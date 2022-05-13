@@ -1,5 +1,8 @@
+#include <stdint.h>
+#pragma pack(push, 1)
+
 struct header {
-	unsigned short ID;
+	uint16_t ID;
 	unsigned char QR : 1;
 	unsigned char OPCODE : 4;
 	unsigned char AA : 1;
@@ -8,34 +11,35 @@ struct header {
 	unsigned char RA : 1;
 	unsigned char Z : 3;
 	unsigned char RCODE : 4;
-	unsigned short QDCOUNT;
-	unsigned short ANCOUNT;
-	unsigned short NSCOUNT;
-	unsigned short ARCOUNT;
+	uint16_t QDCOUNT;
+	uint16_t ANCOUNT;
+	uint16_t NSCOUNT;
+	uint16_t ARCOUNT;
 };
 
 struct question {
-	unsigned short QTYPE;
-	unsigned short QCLASS;
+	uint16_t QTYPE;
+	uint16_t QCLASS;
 };
 
 struct r_data {
-	unsigned short TYPE;
-	unsigned short CLASS;
-	unsigned int TTL;
-	unsigned short RDLENGTH;
+	uint16_t TYPE;
+	uint16_t CLASS;
+	uint32_t TTL;
+	uint16_t RDLENGTH;
 };
 
 struct res_record {
-	unsigned char *NAME;
-	struct r_data* RESOURCE;
+	uint16_t NAME_REF;
+	struct r_data RESOURCE;
 	unsigned char* RDATA;
 };
 
 struct query {
-	unsigned char* name;
-	struct question* question;
+	unsigned char* NAME;
+	struct question* QUESTION;
 };
+#pragma pack(pop)
 
 //struct dnsQueryPacket {
 //	struct header header;
