@@ -18,7 +18,7 @@
     <ClCompile Include="nsclient.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="dnsQueryPacket.c">
+    <ClCompile Include="dnsPacketElements.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
