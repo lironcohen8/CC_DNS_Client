@@ -105,31 +105,47 @@ void createDnsQueryPacket() {
 	createQueryQuestion(question);
 }
 
-void parseAnswerFromAnswerPacket(struct res_record* answerPacket, struct hostent* queryResult) {
-	// reading answers
+void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
+	struct header* answerHeader = (struct header*)buf;
+	if (ntohl(answerHeader->RCODE) == 0) {
+		struct sockaddr_in resultAddress;
+		struct res_record answersRecords[50], authRecords[50], additionalRecords[50];
+		unsigned char *qName = (unsigned char*)buf[sizeof(struct header)];
+		unsigned char *responsePointer = &buf[queryPacketLength]; 
+		unsigned char* currPlaceInQuery = &buf;
+		for (int i = 0; i < ntohs(answerHeader->ANCOUNT); i++) {
+			//answersRecords[i].NAME = getNameFromReference();
+			responsePointer += 2; // 2 for name reference, change after writing relevant func
+			answersRecords[i].RESOURCE = (struct r_data*)(responsePointer);
+			responsePointer += sizeof(struct r_data);
 
-	char * IPString = ntohl(answerPacket->RDATA);
-	uint16_t length = ntohs(answerPacket->RESOURCE.RDLENGTH);
-	/*for (int i = 0; i < ntohs(answerPacket->ANCOUNT); i++)
-	{
-		answers[i].NAME = ReadName(reader, buf, stop);
-		reader += stop;
-		answers[i].resource = (struct r_data*)(reader);
-		reader += sizeof(R_DATA);
-		if (ntohs(answers[i].resource->type) == 1)
-		{
-			answers[i].rdata = new unsigned char[ntohs(answers[i].resource->data_len)];
-			for (int j = 0; j < ntohs(answers[i].resource->data_len); j++)
-				answers[i].rdata[j] = reader[j];
-			answers[i].rdata[ntohs(answers[i].resource->data_len)] = '';
-			reader += ntohs(answers[i].resource->data_len);
+			uint16_t recordType = ntohs(answersRecords[i].RESOURCE->TYPE);
+			if (recordType == 1) { // host address record
+				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
+				answersRecords[i].RDATA = (unsigned char*)calloc(1, recordDataLength);
+
+				// Reading data
+				for (int j = 0; j < recordDataLength; j++) {
+					answersRecords[i].RDATA[j] = responsePointer[j];
+				}
+				answersRecords[i].RDATA[recordDataLength] = '\0';
+				responsePointer += recordDataLength;
+
+				// Parsing address
+				resultAddress.sin_addr.s_addr = (*(long*)answersRecords[i].RDATA);
+				char* resultIPAddress = inet_ntoa(resultAddress.sin_addr);
+				queryResult->h_name = resultIPAddress;
+				return queryResult;
+			}
+			else { // name record
+				//answersRecords[i].RDATA = getNameFromReference();
+			}
 		}
-		else
-		{
-			answers[i].rdata = ReadName(reader, buf, stop);
-			reader += stop;
-		}
-	}*/
+	}
+	else {
+		perror("Got error response code form dns server.");
+		exit(1);
+	}
 }
 
 struct hostent* dnsQuery(char *domainName) {
@@ -152,11 +168,12 @@ struct hostent* dnsQuery(char *domainName) {
 		perror("Couldn't receieve dns query result from socket");
 		exit(1);
 	}
-	struct res_record* answerPacket = (struct res_record*)&buf[queryPacketLength];
+	struct header* answerPacket = (struct header*)buf;
+	// struct res_record* answerPacket = (struct res_record*)&buf[queryPacketLength];
 
 	// Parsing queryResult from answer packet
 	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
-	parseAnswerFromAnswerPacket(answerPacket, queryResult);
+	parseAnswerFromAnswerPacket(queryResult);
 	// queryResult = gethostbyname(domainName);
 	return queryResult;
 }
@@ -191,7 +208,7 @@ int main(int argc, char* argv[]) {
 	while (strcmp(domainName, "quit") != 0) {
 		// Running DNS query using socket
 		struct hostent* queryResult = dnsQuery(domainName);
-		resultIPAddress = inet_ntoa(*((struct in_addr*)queryResult->h_addr_list[0]));
+		resultIPAddress = queryResult->h_name;
 		printf("%s\n", resultIPAddress);
 		printf("nsclient> ");
 		retVal = scanf("%s", domainName);

@@ -3,14 +3,17 @@
 
 struct header {
 	uint16_t ID;
-	unsigned char QR : 1;
-	unsigned char OPCODE : 4;
-	unsigned char AA : 1;
-	unsigned char TC : 1;
+
 	unsigned char RD : 1;
-	unsigned char RA : 1;
-	unsigned char Z : 3;
+	unsigned char TC : 1;
+	unsigned char AA : 1;
+	unsigned char OPCODE : 4;
+	unsigned char QR : 1;
+
 	unsigned char RCODE : 4;
+	unsigned char Z : 3;
+	unsigned char RA : 1;
+
 	uint16_t QDCOUNT;
 	uint16_t ANCOUNT;
 	uint16_t NSCOUNT;
@@ -30,8 +33,8 @@ struct r_data {
 };
 
 struct res_record {
-	uint16_t NAME_REF;
-	struct r_data RESOURCE;
+	unsigned char* NAME;
+	struct r_data* RESOURCE;
 	unsigned char* RDATA;
 };
 
