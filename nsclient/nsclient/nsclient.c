@@ -1,11 +1,4 @@
-#define _WINSOCK_DEPRECATED_NO_WARNINGS // Used for enabling usage of functions like gethostbyname in vs
-#define _CRT_SECURE_NO_WARNINGS // Used for enabling usage of functions like fopen in vs
-#include <stdio.h>
-#include <math.h>
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#include "dnsPacketElements.c"
-#pragma comment(lib, "ws2_32.lib") // Used to link the library Ws2_32.lib for windows socketing
+#include "nsclient.h"
 
 WSADATA wsaData;
 struct sockaddr_in serverAddr;
@@ -13,14 +6,43 @@ unsigned char buf[65536];
 char* domainName, *resultIPAddress;
 int retVal, sockfd, qNameLength, queryPacketLength, addressSize = sizeof(struct sockaddr_in), queryPacketId = 1;
 
-void parseDomainNameIntoParts() {
-	// TODO delete
-	char* result = (char*)calloc(1024, sizeof(char));
-	char* token = strtok(domainName, ".");
-	while (token) {
-		printf("%s\n", token);
-		token = strtok(NULL, ".");
+int isDomainNameValid() {
+	// Validation is based on rules from https://www.geeksforgeeks.org/how-to-validate-a-domain-name-using-regular-expression/
+
+	int domainLength = strlen(domainName);
+	// Check domain name length
+	if (domainLength < 1 || domainLength > 63) {
+		return FALSE;
 	}
+
+	// Check that first and last chars are not -
+	if (domainName[0] == '-' || domainName[domainLength - 1] == '-') {
+		return FALSE;
+	}
+
+
+	//www.com   3 7 length-index +1
+
+	for (int i = 0; i < domainLength; i++) {
+		char c = domainName[i];
+		// Check that char is alphanumeric or . or -
+		if (c != '.' && c != '-' && !isdigit(c) && !isalpha(c)) {
+			return FALSE;
+		}
+	}
+
+	// Check that last part is 2 to 6 characters
+	char *lastDot = strrchr(domainName, '.');
+	if (lastDot == NULL) {
+		lastDot = domainName;
+	}
+	int lastLength = strlen(lastDot);
+	if (lastLength < 2 || lastLength > 6) {
+		return FALSE;
+	}
+
+	return TRUE;
+
 }
 
 void createSocketAndServerAddr(char *DnsServerIpAddress) {
@@ -107,15 +129,12 @@ void createDnsQueryPacket() {
 
 void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
 	struct header* answerHeader = (struct header*)buf;
-	if (ntohl(answerHeader->RCODE) == 0) {
+	if (ntohl(answerHeader->RCODE) == 0) { // No error occurred
 		struct sockaddr_in resultAddress;
-		struct res_record answersRecords[50], authRecords[50], additionalRecords[50];
-		unsigned char *qName = (unsigned char*)buf[sizeof(struct header)];
+		struct res_record answersRecords[50];
 		unsigned char *responsePointer = &buf[queryPacketLength]; 
-		unsigned char* currPlaceInQuery = &buf;
 		for (int i = 0; i < ntohs(answerHeader->ANCOUNT); i++) {
-			//answersRecords[i].NAME = getNameFromReference();
-			responsePointer += 2; // 2 for name reference, change after writing relevant func
+			responsePointer += 2; // 2 bytes for name reference
 			answersRecords[i].RESOURCE = (struct r_data*)(responsePointer);
 			responsePointer += sizeof(struct r_data);
 
@@ -137,14 +156,14 @@ void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
 				queryResult->h_name = resultIPAddress;
 				return queryResult;
 			}
-			else { // name record
-				//answersRecords[i].RDATA = getNameFromReference();
+			else { // other record
+				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
+				responsePointer += recordDataLength;
 			}
 		}
 	}
 	else {
-		perror("Got error response code form dns server.");
-		exit(1);
+		perror("Got error response code form dns server");
 	}
 }
 
@@ -191,7 +210,7 @@ int main(int argc, char* argv[]) {
 	// Allocating memory for domain name and IPAddress
 	domainName = (char*)calloc(1024, sizeof(char));
 	if (domainName == NULL) {
-		perror("Can't allocate memory for domainName.");
+		perror("Can't allocate memory for domainName");
 	}
 	resultIPAddress = (char*)calloc(1024, sizeof(char));
 	if (resultIPAddress == NULL) {
@@ -207,9 +226,14 @@ int main(int argc, char* argv[]) {
 	retVal = scanf("%s", domainName);
 	while (strcmp(domainName, "quit") != 0) {
 		// Running DNS query using socket
-		struct hostent* queryResult = dnsQuery(domainName);
-		resultIPAddress = queryResult->h_name;
-		printf("%s\n", resultIPAddress);
+		if (!isDomainNameValid()) {
+			perror("Bad name");
+		}
+		else {
+			struct hostent* queryResult = dnsQuery(domainName);
+			resultIPAddress = queryResult->h_name;
+			printf("%s\n", resultIPAddress);
+		}
 		printf("nsclient> ");
 		retVal = scanf("%s", domainName);
 	}
