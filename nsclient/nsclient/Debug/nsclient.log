@@ -1,10 +1,8 @@
 ﻿  nsclient.c
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(69,58): warning C4133: 'function': incompatible types - from 'timeval *' to 'const char *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(169,23): warning C4098: 'parseAnswerFromAnswerPacket': 'void' function returning a value
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(144,58): warning C4101: 'additionalRecords': unreferenced local variable
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(144,41): warning C4101: 'authRecords': unreferenced local variable
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(189,30): warning C4047: 'function': 'const char *' differs in levels of indirection from 'unsigned char (*)[65536]'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(189,26): warning C4024: 'sendto': different types for formal and actual parameter 2
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(189,65): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(198,62): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(66,58): warning C4133: 'function': incompatible types - from 'timeval *' to 'const char *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(164,23): warning C4098: 'parseAnswerFromAnswerPacket': 'void' function returning a value
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(183,30): warning C4047: 'function': 'const char *' differs in levels of indirection from 'unsigned char (*)[65536]'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(183,26): warning C4024: 'sendto': different types for formal and actual parameter 2
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(183,65): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(192,62): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
   nsclient.vcxproj -> C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\Debug\nsclient.exe

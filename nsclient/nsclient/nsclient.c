@@ -6,6 +6,13 @@ unsigned char buf[65536];
 char* domainName, *resultIPAddress;
 int retVal, sockfd, qNameLength, queryPacketLength, addressSize = sizeof(struct sockaddr_in), queryPacketId = 1;
 
+void domainToLowercase() {
+	int domainLength = strlen(domainName);
+	for (int i = 0; i < domainLength; i++) {
+		domainName[i] = tolower(domainName[i]);
+	}
+}
+
 int isDomainNameValid() {
 	// Validation is based on rules from https://www.geeksforgeeks.org/how-to-validate-a-domain-name-using-regular-expression/
 
@@ -224,6 +231,7 @@ int main(int argc, char* argv[]) {
 	// Asking user to enter domain name
 	printf("nsclient> ");
 	retVal = scanf("%s", domainName);
+	domainToLowercase();
 	while (strcmp(domainName, "quit") != 0) {
 		// Running DNS query using socket
 		if (!isDomainNameValid()) {
@@ -236,6 +244,7 @@ int main(int argc, char* argv[]) {
 		}
 		printf("nsclient> ");
 		retVal = scanf("%s", domainName);
+		domainToLowercase();
 	}
 
 	// Closing socket and cleaning up WSA
