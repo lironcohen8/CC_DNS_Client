@@ -7,6 +7,7 @@ char* domainName, *resultIPAddress;
 int retVal, sockfd, qNameLength, queryPacketLength, addressSize = sizeof(struct sockaddr_in), queryPacketId = 1;
 
 void domainToLowercase() {
+	// Converting domain name to lowercase 
 	int domainLength = strlen(domainName);
 	for (int i = 0; i < domainLength; i++) {
 		domainName[i] = tolower(domainName[i]);
@@ -27,9 +28,6 @@ int isDomainNameValid() {
 		return FALSE;
 	}
 
-
-	//www.com   3 7 length-index +1
-
 	for (int i = 0; i < domainLength; i++) {
 		char c = domainName[i];
 		// Check that char is alphanumeric or . or -
@@ -49,7 +47,6 @@ int isDomainNameValid() {
 	}
 
 	return TRUE;
-
 }
 
 void createSocketAndServerAddr(char *DnsServerIpAddress) {
@@ -62,8 +59,8 @@ void createSocketAndServerAddr(char *DnsServerIpAddress) {
 
 	// Setting timeout to socket to 2 seconds
 	struct timeval tv;
-	tv.tv_sec = 2;
-	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
+	tv.tv_sec = TIMEOUT_IN_SECS;
+	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
 	if (retVal < 0) {
 		perror("Can't set timeout to socket");
 		exit(1);
@@ -76,6 +73,7 @@ void createSocketAndServerAddr(char *DnsServerIpAddress) {
 }
 
 void createQueryHeader(struct header* header) {
+	// Creating query header struct
 	header->ID = queryPacketId++;
 	header->QR = 0;
 	header->OPCODE = 0;
@@ -92,11 +90,12 @@ void createQueryHeader(struct header* header) {
 }
 
 void createQueryQname(char *qNameStart) {
-	//int originalLength = strlen(domainName); // www.google.com -> 3www6google3com0
+	// Creating query name according to domain names encoding
 	int letterIndex = 0;
 	char* qName = qNameStart;
 	strcat((char*)domainName, ".");
 
+	// Counting characters until dot and adding the number upfront
 	for (int dotIndex = 0; dotIndex < (int)strlen((char*)domainName); dotIndex++) {
 		if (domainName[dotIndex] == '.')
 		{
@@ -114,11 +113,13 @@ void createQueryQname(char *qNameStart) {
 }
 
 void createQueryQuestion(struct question *question) {
+	// Creating query question struct
 	question->QCLASS = htons(1);
 	question->QTYPE = htons(1);
 }
 
 void createDnsQueryPacket() {
+	// Creating dns query packet
 	struct header* header = NULL;
 
 	// Creating query header
@@ -136,36 +137,54 @@ void createDnsQueryPacket() {
 
 void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
 	struct header* answerHeader = (struct header*)buf;
+
+	// Parsing the addresses from packet
 	if (ntohl(answerHeader->RCODE) == 0) { // No error occurred
-		struct sockaddr_in resultAddress;
-		struct res_record answersRecords[50];
-		unsigned char *responsePointer = &buf[queryPacketLength]; 
-		for (int i = 0; i < ntohs(answerHeader->ANCOUNT); i++) {
-			responsePointer += 2; // 2 bytes for name reference
-			answersRecords[i].RESOURCE = (struct r_data*)(responsePointer);
-			responsePointer += sizeof(struct r_data);
+
+		// Setting up records array
+		int recordsCount = ntohs(answerHeader->ANCOUNT);
+		struct res_record *answersRecords = (struct res_record*)calloc(recordsCount, sizeof(struct res_record));
+		if (answersRecords == NULL) {
+			perror("Can't allocate memory for records' array");
+			exit(1);
+		}
+
+		// Answer pointer starts from end of query
+		unsigned char *answerPointer = &buf[queryPacketLength];
+
+		// Going over records
+		for (int i = 0; i < recordsCount; i++) {
+			answerPointer += 2; // 2 bytes for name reference
+			answersRecords[i].RESOURCE = (struct r_data*)(answerPointer);
+			answerPointer += sizeof(struct r_data);
 
 			uint16_t recordType = ntohs(answersRecords[i].RESOURCE->TYPE);
 			if (recordType == 1) { // host address record
 				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
+
+				// Setting up answer data
 				answersRecords[i].RDATA = (unsigned char*)calloc(1, recordDataLength);
+				if (answersRecords[i].RDATA == NULL) {
+					perror("Can't allocate memory for record's data");
+					exit(1);
+				}
 
 				// Reading data
 				for (int j = 0; j < recordDataLength; j++) {
-					answersRecords[i].RDATA[j] = responsePointer[j];
+					answersRecords[i].RDATA[j] = answerPointer[j];
 				}
 				answersRecords[i].RDATA[recordDataLength] = '\0';
-				responsePointer += recordDataLength;
+				answerPointer += recordDataLength;
 
 				// Parsing address
+				struct sockaddr_in resultAddress;
 				resultAddress.sin_addr.s_addr = (*(long*)answersRecords[i].RDATA);
 				char* resultIPAddress = inet_ntoa(resultAddress.sin_addr);
 				queryResult->h_name = resultIPAddress;
-				return queryResult;
 			}
-			else { // other record
+			else { // other record type
 				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
-				responsePointer += recordDataLength;
+				answerPointer += recordDataLength;
 			}
 		}
 	}
@@ -180,27 +199,28 @@ struct hostent* dnsQuery(char *domainName) {
 
 	// Sending dns query packet to server
 	queryPacketLength = sizeof(struct header) + qNameLength + sizeof(struct question);
-	retVal = sendto(sockfd, &buf, queryPacketLength, 0, &serverAddr, addressSize);
+	retVal = sendto(sockfd, (char *)buf, queryPacketLength, 0, &serverAddr, addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
 		perror("Couldn't send dns query packet to socket");
 		exit(1);
 	}
 
 	// Recieving dns result from server
-	//struct res_record answers[20], auth[20], addit[20]; // the replies from the DNS server
-	//int answerPacketLength = sizeof(struct dnsAnswerPacket);
 	retVal = recvfrom(sockfd, (char *)buf, 65536, 0, &serverAddr, &addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
 		perror("Couldn't receieve dns query result from socket");
 		exit(1);
 	}
 	struct header* answerPacket = (struct header*)buf;
-	// struct res_record* answerPacket = (struct res_record*)&buf[queryPacketLength];
 
 	// Parsing queryResult from answer packet
 	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
+	if (queryResult == NULL) {
+		perror("Can't allocate memory for query Result");
+		exit(1);
+	}
 	parseAnswerFromAnswerPacket(queryResult);
-	// queryResult = gethostbyname(domainName);
+	// queryResult = gethostbyname(domainName); TODO delete
 	return queryResult;
 }
 
@@ -218,6 +238,7 @@ int main(int argc, char* argv[]) {
 	domainName = (char*)calloc(1024, sizeof(char));
 	if (domainName == NULL) {
 		perror("Can't allocate memory for domainName");
+		exit(1);
 	}
 	resultIPAddress = (char*)calloc(1024, sizeof(char));
 	if (resultIPAddress == NULL) {
@@ -232,12 +253,14 @@ int main(int argc, char* argv[]) {
 	printf("nsclient> ");
 	retVal = scanf("%s", domainName);
 	domainToLowercase();
+
 	while (strcmp(domainName, "quit") != 0) {
-		// Running DNS query using socket
+		// Validating domain name
 		if (!isDomainNameValid()) {
 			perror("Bad name");
 		}
 		else {
+			// Running DNS query using socket
 			struct hostent* queryResult = dnsQuery(domainName);
 			resultIPAddress = queryResult->h_name;
 			printf("%s\n", resultIPAddress);
@@ -248,7 +271,17 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Closing socket and cleaning up WSA
-	closesocket(sockfd);
-	WSACleanup();
+	retVal = closesocket(sockfd);
+	if (retVal != 0) {
+		perror("Error at closesocket");
+		exit(1);
+	}
+
+	retVal = WSACleanup();
+	if (retVal != 0) {
+		perror("Error at WSACleanup");
+		exit(1);
+	}
+
 	return 0;
 }

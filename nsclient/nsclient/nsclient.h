@@ -1,5 +1,6 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // Used for enabling usage of functions like gethostbyname in vs
 #define _CRT_SECURE_NO_WARNINGS // Used for enabling usage of functions like fopen in vs
+#define TIMEOUT_IN_SECS 2;
 #define TRUE 1
 #define FALSE 0
 
@@ -9,6 +10,7 @@
 #include <ws2tcpip.h>
 #include <stdint.h>
 #include <ctype.h>
+
 #pragma comment(lib, "ws2_32.lib") // Used to link the library Ws2_32.lib for windows socketing
 #pragma pack(push, 1)
 
@@ -53,14 +55,5 @@ struct query {
 	unsigned char* NAME;
 	struct question* QUESTION;
 };
-#pragma pack(pop)
 
-//struct dnsQueryPacket {
-//	struct header header;
-//	struct question question;
-//};
-//
-//struct dnsAnswerPacket {
-//	struct header header;
-//	struct answer answer;
-//};
+#pragma pack(pop)
