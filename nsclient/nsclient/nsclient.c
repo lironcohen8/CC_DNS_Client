@@ -58,13 +58,13 @@ void createSocketAndServerAddr(char *DnsServerIpAddress) {
 	}
 
 	// Setting timeout to socket to 2 seconds
-	struct timeval tv;
+	/*struct timeval tv;
 	tv.tv_sec = TIMEOUT_IN_SECS;
 	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
 	if (retVal < 0) {
 		perror("Can't set timeout to socket");
 		exit(1);
-	}
+	}*/
 
 	// Creating server address struct
 	serverAddr.sin_family = AF_INET;
@@ -79,7 +79,7 @@ void createQueryHeader(struct header* header) {
 	header->OPCODE = 0;
 	header->AA = 0;
 	header->TC = 0;
-	header->RD = 0;
+	header->RD = htons(1); // TODO validate this change
 	header->RA = 0;
 	header->Z = 0;
 	header->RCODE = 0;
