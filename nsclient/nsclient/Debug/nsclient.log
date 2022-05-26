@@ -1,5 +1,6 @@
 ﻿  nsclient.c
 C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(62,70): warning C4133: 'function': incompatible types - from 'unsigned long *' to 'const char *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(209,72): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
-C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(216,62): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(162,1): warning C4047: 'initializing': 'unsigned char *' differs in levels of indirection from 'char ***'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(233,72): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'const sockaddr *'
+C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\nsclient\nsclient.c(240,62): warning C4133: 'function': incompatible types - from 'sockaddr_in *' to 'sockaddr *'
   nsclient.vcxproj -> C:\Users\user\OneDrive\Desktop\Liron\Studies\CC\CC_DNS_Client\nsclient\Debug\nsclient.exe

@@ -136,7 +136,9 @@ void createDnsQueryPacket() {
 
 struct hostent* parseAnswerFromAnswerPacket() {
 	struct header* answerHeader = (struct header*)buf;
+	int foundAddress = FALSE;
 
+	// Creating queryResult struct
 	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
 	if (queryResult == NULL) {
 		perror("Can't allocate memory for query Result");
@@ -144,7 +146,8 @@ struct hostent* parseAnswerFromAnswerPacket() {
 	}
 
 	// Parsing the addresses from packet
-	if (ntohl(answerHeader->RCODE) == 0) { // No error occurred
+	unsigned long rcode = answerHeader->RCODE;
+	if (rcode == 0) { // No error occurred
 
 		// Setting up records array
 		int recordsCount = ntohs(answerHeader->ANCOUNT);
@@ -156,6 +159,7 @@ struct hostent* parseAnswerFromAnswerPacket() {
 
 		// Answer pointer starts from end of query
 		unsigned char *answerPointer = &buf[queryPacketLength];
+		unsigned char *resultListPointer = &(queryResult->h_addr_list);
 
 		// Going over records
 		for (int i = 0; i < recordsCount; i++) {
@@ -185,8 +189,9 @@ struct hostent* parseAnswerFromAnswerPacket() {
 				struct sockaddr_in resultAddress;
 				resultAddress.sin_addr.s_addr = (*(long*)answersRecords[i].RDATA);
 				char* resultIPAddress = inet_ntoa(resultAddress.sin_addr);
-				queryResult->h_name = resultIPAddress;
-				return queryResult;
+				queryResult->h_addr_list = &resultIPAddress;
+				resultListPointer += strlen(resultIPAddress);
+				foundAddress = TRUE;
 			}
 			else { // other record type
 				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
@@ -194,10 +199,29 @@ struct hostent* parseAnswerFromAnswerPacket() {
 			}
 		}
 	}
-	else {
-		perror("Got error response code form dns server");
+	else if (rcode == 1) { // Format Error
+		printf("ERROR: FORMATERROR\n");
 	}
-	return NULL;
+	else if (rcode == 2) { // Server Failure Error
+		printf("ERROR: SERVERFAILURE\n");
+	}
+	else if (rcode == 3) { // Name Error
+		printf("ERROR: NAMEERROR\n");
+	}
+	else if (rcode == 4) { // Not Implemented Error
+		printf("ERROR: NOTIMPLEMENTED\n");
+	}
+	else if (rcode == 5) { // Refused Error
+		printf("ERROR: REFUSED\n");
+	}
+
+	// Returning result accourding to findings
+	if (foundAddress) {
+		return queryResult;
+	}
+	else {
+		return NULL;
+	}
 }
 
 struct hostent* dnsQuery(char *domainName) {
@@ -260,13 +284,13 @@ int main(int argc, char* argv[]) {
 	while (strcmp(domainName, "quit") != 0) {
 		// Validating domain name
 		if (!isDomainNameValid()) {
-			perror("Bad name");
+			printf("ERROR: BAD NAME\n");
 		}
 		else {
 			// Running DNS query using socket
 			struct hostent* queryResult = dnsQuery(domainName);
 			if (queryResult != NULL) {
-				resultIPAddress = queryResult->h_name;
+				resultIPAddress = queryResult->h_addr_list[0];
 				printf("%s\n", resultIPAddress);
 			}
 		}
