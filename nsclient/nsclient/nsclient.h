@@ -1,6 +1,5 @@
 #define _WINSOCK_DEPRECATED_NO_WARNINGS // Used for enabling usage of functions like gethostbyname in vs
 #define _CRT_SECURE_NO_WARNINGS // Used for enabling usage of functions like fopen in vs
-#define TIMEOUT_IN_SECS 2;
 #define TRUE 1
 #define FALSE 0
 
@@ -15,17 +14,35 @@
 #pragma pack(push, 1)
 
 struct header {
-	uint16_t ID;
+	uint32_t ID : 16;
 
+	uint32_t RD : 1;
+	uint32_t TC : 1;
+	uint32_t AA : 1;
+	uint32_t OPCODE : 4;
+	uint32_t QR : 1;
+
+	uint32_t RCODE : 4;
+	uint32_t Z : 3;
+	uint32_t RA : 1;
+
+	/*unsigned char QR : 1;
+	unsigned char OPCODE : 4;
+	unsigned char AA : 1;
+	unsigned char TC : 1;
+	unsigned char RD : 1;
+	unsigned char RA : 1;
+	unsigned char Z : 3;
+	unsigned char RCODE : 4;*/
+
+	/*unsigned char RCODE : 4;
+	unsigned char Z : 3;
+	unsigned char RA : 1;
 	unsigned char RD : 1;
 	unsigned char TC : 1;
 	unsigned char AA : 1;
 	unsigned char OPCODE : 4;
-	unsigned char QR : 1;
-
-	unsigned char RCODE : 4;
-	unsigned char Z : 3;
-	unsigned char RA : 1;
+	unsigned char QR : 1;*/
 
 	uint16_t QDCOUNT;
 	uint16_t ANCOUNT;
@@ -34,8 +51,8 @@ struct header {
 };
 
 struct question {
-	uint16_t QTYPE;
-	uint16_t QCLASS;
+	uint16_t QTYPE : 16;
+	uint16_t QCLASS : 16;
 };
 
 struct r_data {

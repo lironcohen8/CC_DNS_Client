@@ -58,13 +58,12 @@ void createSocketAndServerAddr(char *DnsServerIpAddress) {
 	}
 
 	// Setting timeout to socket to 2 seconds
-	/*struct timeval tv;
-	tv.tv_sec = TIMEOUT_IN_SECS;
-	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&tv, sizeof(tv));
+	unsigned long timeoutInMsecs = 2000;
+	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeoutInMsecs, sizeof(unsigned long));
 	if (retVal < 0) {
 		perror("Can't set timeout to socket");
 		exit(1);
-	}*/
+	}
 
 	// Creating server address struct
 	serverAddr.sin_family = AF_INET;
@@ -79,7 +78,7 @@ void createQueryHeader(struct header* header) {
 	header->OPCODE = 0;
 	header->AA = 0;
 	header->TC = 0;
-	header->RD = htons(1); // TODO validate this change
+	header->RD = 1;
 	header->RA = 0;
 	header->Z = 0;
 	header->RCODE = 0;
@@ -135,8 +134,14 @@ void createDnsQueryPacket() {
 	createQueryQuestion(question);
 }
 
-void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
+struct hostent* parseAnswerFromAnswerPacket() {
 	struct header* answerHeader = (struct header*)buf;
+
+	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
+	if (queryResult == NULL) {
+		perror("Can't allocate memory for query Result");
+		exit(1);
+	}
 
 	// Parsing the addresses from packet
 	if (ntohl(answerHeader->RCODE) == 0) { // No error occurred
@@ -181,6 +186,7 @@ void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
 				resultAddress.sin_addr.s_addr = (*(long*)answersRecords[i].RDATA);
 				char* resultIPAddress = inet_ntoa(resultAddress.sin_addr);
 				queryResult->h_name = resultIPAddress;
+				return queryResult;
 			}
 			else { // other record type
 				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
@@ -191,6 +197,7 @@ void parseAnswerFromAnswerPacket(struct hostent* queryResult) {
 	else {
 		perror("Got error response code form dns server");
 	}
+	return NULL;
 }
 
 struct hostent* dnsQuery(char *domainName) {
@@ -214,12 +221,8 @@ struct hostent* dnsQuery(char *domainName) {
 	struct header* answerPacket = (struct header*)buf;
 
 	// Parsing queryResult from answer packet
-	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
-	if (queryResult == NULL) {
-		perror("Can't allocate memory for query Result");
-		exit(1);
-	}
-	parseAnswerFromAnswerPacket(queryResult);
+	
+	struct hostent* queryResult = parseAnswerFromAnswerPacket();
 	// queryResult = gethostbyname(domainName); TODO delete
 	return queryResult;
 }
@@ -262,8 +265,10 @@ int main(int argc, char* argv[]) {
 		else {
 			// Running DNS query using socket
 			struct hostent* queryResult = dnsQuery(domainName);
-			resultIPAddress = queryResult->h_name;
-			printf("%s\n", resultIPAddress);
+			if (queryResult != NULL) {
+				resultIPAddress = queryResult->h_name;
+				printf("%s\n", resultIPAddress);
+			}
 		}
 		printf("nsclient> ");
 		retVal = scanf("%s", domainName);
