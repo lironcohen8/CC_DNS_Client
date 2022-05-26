@@ -156,6 +156,7 @@ struct hostent* parseAnswerFromAnswerPacket() {
 			perror("Can't allocate memory for records' array");
 			exit(1);
 		}
+		memset(resultIPAddress, 0, sizeof(resultIPAddress));
 
 		// Answer pointer starts from end of query
 		unsigned char *answerPointer = &buf[queryPacketLength];
@@ -188,9 +189,10 @@ struct hostent* parseAnswerFromAnswerPacket() {
 				// Parsing address
 				struct sockaddr_in resultAddress;
 				resultAddress.sin_addr.s_addr = (*(long*)answersRecords[i].RDATA);
-				char* resultIPAddress = inet_ntoa(resultAddress.sin_addr);
+				char* currAddress = inet_ntoa(resultAddress.sin_addr);
+				strncat(resultIPAddress, currAddress, strlen(currAddress));
+				strncat(resultIPAddress, "\n", strlen("\n"));
 				queryResult->h_addr_list = &resultIPAddress;
-				resultListPointer += strlen(resultIPAddress);
 				foundAddress = TRUE;
 			}
 			else { // other record type
@@ -217,6 +219,7 @@ struct hostent* parseAnswerFromAnswerPacket() {
 
 	// Returning result accourding to findings
 	if (foundAddress) {
+		queryResult->h_addr_list = &resultIPAddress;
 		return queryResult;
 	}
 	else {
@@ -291,7 +294,7 @@ int main(int argc, char* argv[]) {
 			struct hostent* queryResult = dnsQuery(domainName);
 			if (queryResult != NULL) {
 				resultIPAddress = queryResult->h_addr_list[0];
-				printf("%s\n", resultIPAddress);
+				printf("%s", resultIPAddress);
 			}
 		}
 		printf("nsclient> ");
