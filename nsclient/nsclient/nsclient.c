@@ -141,7 +141,7 @@ struct hostent* parseAnswerFromAnswerPacket() {
 	// Creating queryResult struct
 	struct hostent* queryResult = (struct hostent*)calloc(1, sizeof(struct hostent));
 	if (queryResult == NULL) {
-		perror("Can't allocate memory for query Result");
+		perror("Can't allocate memory for query result");
 		exit(1);
 	}
 
@@ -235,15 +235,18 @@ struct hostent* dnsQuery(char *domainName) {
 	queryPacketLength = sizeof(struct header) + qNameLength + sizeof(struct question);
 	retVal = sendto(sockfd, (char *)buf, queryPacketLength, 0, &serverAddr, addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
-		perror("Couldn't send dns query packet to socket");
-		exit(1);
+		printf("Couldn't send dns query packet to socket\n");
 	}
 
 	// Recieving dns result from server
 	retVal = recvfrom(sockfd, (char *)buf, 65536, 0, &serverAddr, &addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
-		perror("Couldn't receieve dns query result from socket");
-		exit(1);
+		if (WSAGetLastError() == WSAETIMEDOUT) {
+			printf("ERROR: RECVTIMEDOUT\n");
+		}
+		else {
+			printf("Couldn't receieve dns query result from socket\n");
+		}
 	}
 	struct header* answerPacket = (struct header*)buf;
 
