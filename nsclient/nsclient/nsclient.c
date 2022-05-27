@@ -250,9 +250,7 @@ struct hostent* dnsQuery(char *domainName) {
 	struct header* answerPacket = (struct header*)buf;
 
 	// Parsing queryResult from answer packet
-	
 	struct hostent* queryResult = parseAnswerFromAnswerPacket();
-	// queryResult = gethostbyname(domainName); TODO delete
 	return queryResult;
 }
 
