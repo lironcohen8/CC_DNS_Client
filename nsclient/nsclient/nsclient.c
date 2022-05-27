@@ -172,7 +172,7 @@ struct hostent* parseAnswerFromAnswerPacket() {
 				uint16_t recordDataLength = ntohs(answersRecords[i].RESOURCE->RDLENGTH);
 
 				// Setting up answer data
-				answersRecords[i].RDATA = (unsigned char*)calloc(1, recordDataLength);
+				answersRecords[i].RDATA = (unsigned char*)calloc(1, recordDataLength+1);
 				if (answersRecords[i].RDATA == NULL) {
 					perror("Can't allocate memory for record's data");
 					exit(1);
