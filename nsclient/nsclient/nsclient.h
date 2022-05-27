@@ -26,24 +26,6 @@ struct header {
 	uint32_t Z : 3;
 	uint32_t RA : 1;
 
-	/*unsigned char QR : 1;
-	unsigned char OPCODE : 4;
-	unsigned char AA : 1;
-	unsigned char TC : 1;
-	unsigned char RD : 1;
-	unsigned char RA : 1;
-	unsigned char Z : 3;
-	unsigned char RCODE : 4;*/
-
-	/*unsigned char RCODE : 4;
-	unsigned char Z : 3;
-	unsigned char RA : 1;
-	unsigned char RD : 1;
-	unsigned char TC : 1;
-	unsigned char AA : 1;
-	unsigned char OPCODE : 4;
-	unsigned char QR : 1;*/
-
 	uint16_t QDCOUNT;
 	uint16_t ANCOUNT;
 	uint16_t NSCOUNT;

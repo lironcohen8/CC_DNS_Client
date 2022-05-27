@@ -59,7 +59,7 @@ void createSocketAndServerAddr(char *DnsServerIpAddress) {
 
 	// Setting timeout to socket to 2 seconds
 	unsigned long timeoutInMsecs = 2000;
-	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, &timeoutInMsecs, sizeof(unsigned long));
+	retVal = setsockopt(sockfd, SOL_SOCKET, SO_RCVTIMEO, (const char *)&timeoutInMsecs, sizeof(unsigned long));
 	if (retVal < 0) {
 		perror("Can't set timeout to socket");
 		exit(1);
@@ -160,7 +160,6 @@ struct hostent* parseAnswerFromAnswerPacket() {
 
 		// Answer pointer starts from end of query
 		unsigned char *answerPointer = &buf[queryPacketLength];
-		unsigned char *resultListPointer = &(queryResult->h_addr_list);
 
 		// Going over records
 		for (int i = 0; i < recordsCount; i++) {
@@ -233,13 +232,13 @@ struct hostent* dnsQuery(char *domainName) {
 
 	// Sending dns query packet to server
 	queryPacketLength = sizeof(struct header) + qNameLength + sizeof(struct question);
-	retVal = sendto(sockfd, (char *)buf, queryPacketLength, 0, &serverAddr, addressSize);
+	retVal = sendto(sockfd, (char *)buf, queryPacketLength, 0, (struct sockaddr*)&serverAddr, addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
 		printf("Couldn't send dns query packet to socket\n");
 	}
 
 	// Recieving dns result from server
-	retVal = recvfrom(sockfd, (char *)buf, 65536, 0, &serverAddr, &addressSize);
+	retVal = recvfrom(sockfd, (char *)buf, 65536, 0, (struct sockaddr*)&serverAddr, &addressSize);
 	if (retVal == SOCKET_ERROR) { // There was an error
 		if (WSAGetLastError() == WSAETIMEDOUT) {
 			printf("ERROR: RECVTIMEDOUT\n");

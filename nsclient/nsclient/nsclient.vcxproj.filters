@@ -18,8 +18,10 @@
     <ClCompile Include="nsclient.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="nsclient.h">
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="nsclient.h">
       <Filter>Source Files</Filter>
-    </ClCompile>
+    </ClInclude>
   </ItemGroup>
 </Project>
